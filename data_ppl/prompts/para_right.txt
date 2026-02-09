@@ -1,0 +1,159 @@
+Your task is to determine whether the model answer is consistent with the standard answer in terms of content and conclusion, i.e., their answer consistency.
+
+Note that the input and output formats are as follows:  
+Input format:  
+【Standard Answer】  
+[TEXT_START]  
+XXXX (content of the standard answer)  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+XXXX (content of the model answer)  
+[TEXT_END]  
+
+Output format:  
+【Judgment Result】  
+[SAME_ANSWER]  
+X (whether the answers are consistent; X=true if the model answer and standard answer are consistent in content and conclusion, otherwise X=false)  
+[SAME_ANSWER]  
+[REASON_START]  
+XXXX (reason for consistency or inconsistency)  
+[REASON_END]  
+
+Once you understand the background and input/output formats above, you need to determine whether the model answer and standard answer are consistent in content and conclusion according to the following rules:  
+1. If the model answer and standard answer differ in the final answer or conclusion, then the answers are inconsistent.  
+2. If the key points in the model answer (key points refer to the semantic content described in the text, i.e., the described objects, explanations, conclusions, etc.) are fewer or more than those in the standard answer, then the answers should also be judged as inconsistent.  
+3. The wording of the model answer and standard answer may differ, i.e., there can be some variation in content, but the key points mentioned in Rule 2 must be reflected (the comparison is based on semantics, not verbatim).  
+4. Note that line breaks and whitespace characters in the model answer do not affect the judgment of answer consistency.  
+5. If the model answer and standard answer are in different languages, then the answers are inconsistent.  
+
+Below are some input-output examples for reference:
+
+Input/Output Example 1:  
+【Standard Answer】  
+[TEXT_START]  
+To use the Game Turbo feature on Xiaomi phones, follow these steps:  
+
+1. **Open Security Center**: Find and tap the "Security Center" app on the phone's interface [7](@ref).  
+2. **Enter Game Turbo**: In the Security Center interface, tap the "Game Turbo" option [1,3](@ref).  
+3. **Add Games**: After entering the Game Turbo interface, tap the "+" icon in the upper-right corner to select and add the games you want to accelerate [5](@ref).  
+4. **Optimize Settings**: Tap the "gear" icon to enter the settings page, where you can enable features like memory cleanup, network acceleration, and anti-misoperation [4,6](@ref).  
+
+These steps can effectively improve game smoothness and reduce interruptions from calls and notifications during gameplay [3,7](@ref).  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+To use the Game Turbo feature on Xiaomi phones, follow these steps:  
+
+1. Open Security Center: Find and tap the "Security Center" app on the phone's interface [7](@ref).  
+2. Enter Game Turbo: In the Security Center interface, tap the "Game Turbo" option [1,3](@ref).  
+3. Add Games: After entering the Game Turbo interface, tap the "+" icon in the upper-right corner to select and add the games you want to accelerate [5](@ref).  
+
+These steps can effectively improve game smoothness and reduce interruptions from calls and notifications during gameplay [3,7](@ref).  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_ANSWER]  
+false  
+[SAME_ANSWER]  
+[REASON_START]  
+The model answer lacks Step 4, so the answers are inconsistent.  
+[REASON_END]  
+
+Input/Output Example 2:  
+【Standard Answer】  
+[TEXT_START]  
+Thought:  
+Convert "new york city" to capitalize the first letter of each word and lowercase the rest, i.e., 'New York City'.  
+
+Final Answer:  
+{"Entry1": {"City": "New York City"}}  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+Convert "new york city" to capitalize the first letter of each word and lowercase the rest, i.e., 'New york City'.  
+
+Final Answer:  
+{"Entry1": {"City": "New york City"}}  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_ANSWER]  
+false  
+[SAME_ANSWER]  
+[REASON_START]  
+The model answer's conversion result for "new york city" is 'New york City', which differs from the standard answer 'New York City', so the answers are inconsistent.  
+[REASON_END]  
+
+Input/Output Example 3:  
+【Standard Answer】  
+[TEXT_START]  
+Regarding the question about genital herpes, based on the known information, I cannot provide a relevant answer. The reasons are as follows:  
+
+1. The known information focuses on legally notifiable diseases in the fever-with-rash syndrome, including measles, rubella, hand-foot-and-mouth disease, chickenpox, shingles, etc., but does not mention genital herpes.  
+2. Genital herpes falls under the category of sexually transmitted diseases (mainly caused by HSV-2), which is different from the varicella-zoster virus (VZV) and enterovirus (EV) covered in the current materials.  
+3. The vaccination plans in the existing materials (e.g., recombinant zoster vaccine) only target the varicella-zoster virus and do not involve prevention for genital herpes.  
+
+It is recommended to consult a professional medical institution or a dermatologist/venereologist for targeted diagnosis and treatment advice. For international logistics-related infectious disease prevention measures, we can provide professional advice, but this question is beyond our expertise.  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+Regarding the question about genital herpes, based on the known information, I cannot provide a relevant answer.  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_ANSWER]  
+false  
+[SAME_ANSWER]  
+[REASON_START]  
+The model answer lacks the specific reasons and subsequent recommendations provided in the standard answer.  
+[REASON_END]  
+
+Input/Output Example 4:  
+【Standard Answer】  
+[TEXT_START]  
+Based on the known information, the support status for the EasyMesh version of TL-XDR6010 is as follows:  
+1. **TL-XDR6010 EasyMesh Version 1.0**: Supports EasyMesh 2.0 out of the box.  
+2. **TL-XDR6010 EasyMesh Version 2.0**: Requires upgrading to firmware version 1.0.9 Build 20240205 Rel.35518 or later to support EasyMesh 2.0.  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+Apologies, the smart assistant cannot answer this question yet.  
+The known information cannot address this question.  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_ANSWER]  
+false  
+[SAME_ANSWER]  
+[REASON_START]  
+The model answer and standard answer are inconsistent in their statements.  
+[REASON_END]  
+
+Input/Output Example 5:  
+【Standard Answer】  
+[TEXT_START]  
+Thought: The user expressed an intent to query the parking location of a vehicle, which aligns with the task information. However, the user did not provide any specific parameter information. According to the task requirements, the first mandatory parameter, "license plate number," must be inquired about first.  
+
+Final Answer: {"Parameters": {"License Plate Number":"", "Query Date":"", "Query Time Range":""}, "Reply": "May I ask for your license plate number? The license plate number is the official registration number used to uniquely identify your vehicle, e.g., Yue B12345.", "Is Conversation Over": "No"}  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+Thought: The user expressed an intent to query the parking location of a vehicle, which aligns with the task information. However, the user did not provide any specific parameter information. Therefore, the first mandatory parameter, "license plate number," must be inquired about first.  
+Final Answer: {"Parameters":{"License Plate Number":"","Query Date":"","Query Time Range":""},"Reply":"May I ask for your license plate number? The license plate number is the official registration number used to uniquely identify your vehicle, e.g., Yue B12345.","Is Conversation Over":"No"}  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_ANSWER]  
+true  
+[SAME_ANSWER]  
+[REASON_START]  
+The key points and Final Answer in the model answer are consistent with the standard answer, so the answer consistency is true.  
+[REASON_END]  
+
+Now, given the standard answer and model answer below, please provide the judgment result for answer consistency based on the examples and requirements above:  
+【Standard Answer】  
+[TEXT_START]  
+{raw_answer}  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+{model_answer}  
+[TEXT_END]  
+
+【Judgment Result】

@@ -1,0 +1,243 @@
+Your task is to rewrite the raw output text into parallel structures if necessary. If certain parts of the text can be converted into a parallel format — in which the content can be divided into multiple, logically independent blocks — then the model is able to generate such content in parallel instead of sequentially. This significantly improves decoding efficiency and response time. The parallel decoding process typically consists of the following steps:
+
+1. Serial content
+2. Generate parallel content (which may include multiple parallel branches)
+3. Wait for all parallel branches to complete before resuming serial content
+4. Repeat steps 1–3 until output is complete
+
+The core idea of parallel rewriting is to split the original output text into different parallel branches wherever possible, which can be independently completed without relying on each other's results. Once all parallel branches have been completed, aggregate the results before proceeding with further parallel branch planning, continuing this process until the problem is solved. This parallel branch division can be applied to various tasks, such as reading comprehension or mathematical problem-solving.
+
+Note that the input and output formats are as follows:  
+Input format:
+【Original Output】
+[INPUT_START]
+XXXX (raw output text from the language model)
+[INPUT_END]
+
+Output format:
+【Parallel Text】
+[PARALLEL]
+X (X=true if parallelizable content exists, otherwise X=false)
+[PARALLEL]
+[OUTPUT_START]
+XXXX (rewritten parallel text if parallel content exists; otherwise, leave blank)
+[OUTPUT_END]
+
+First, determine whether the given raw output text can be generated in parallel. If no parallelizable content exists, write "false" between [PARALLEL] tags and leave the section between [OUTPUT_START] and [OUTPUT_END] empty. If parallelization is possible, annotate the language model output text with specific tags to highlight suitable paragraphs for parallel generation. Two parallel tags are used: <branch> and <branchgroup>, according to the following instructions:
+1. Use <branchgroup> tags to wrap portions of the text that can be generated in parallel; divide the content by semantics, headings, steps, etc. Each piece of divided parallel content should be wrapped and distinguished using <branch> tags.
+2. Use <branch> tags to split <branchgroup> content. Each division represents a parallel branch, which can be generated asynchronously without dependency on other branches. Therefore, <branch> tags should not be applied to content that depends on current parallel branches. For each <branch> tag, generate a very concise descriptive title as the tag's title attribute (format: <branch title="title word">). This title description helps maintain continuity and consistency after closing async tags, and ensures all <branch> tags within a <branchgroup> have unique title words.
+3. Within the same <branchgroup>, there must be no explicit or implicit interdependencies among parallel branches. If any branch relies on another's intermediate results or conclusions, the parallel division is unreasonable and must be reorganized. Additionally, if a branch depends on another as a prerequisite, parallel division is also unsuitable.
+4. Use a single </branchgroup> closing tag for synchronization. All content generated before </branchgroup>, including text within <branch> tags, can then be accessed in subsequent text generation to ensure continuity and consistency. Detailed specifications for tag annotation rules follow below:
+
+Parallel Tag Annotation Rules:
+- <branch> and </branch> tags, as well as <branchgroup> and </branchgroup> tags, must be used in pairs.
+- No non-empty content should appear between a </branch> closing tag and the next <branch> opening tag; all parallel branch content must be inside <branch> tags.
+- Ensure that each <branch> tag within a <branchgroup> is mutually independent and does not depend on the results of any other <branch> tag.
+- Ensure that the content inside each <branch> tag is longer than its title attribute, and is at least 10 characters. This maximizes parallel generation efficiency.
+- <branch> tag content must come from the original output text and can be slightly adjusted to fit parallel branch requirements, but should not alter the original semantics or format. The content inside <branch> tags must maintain the original output's format so that removing the parallel tags restores the original format.
+- The title attribute of <branch> should be concise (≤ 10 characters), and significantly shorter than the content within the <branch> tag. The title can be taken from the original parallel content if it is sufficiently concise and summarizes the core subject; otherwise, generate a new title.
+- If the original output cannot be parallelized or is very short (≤ 20 characters), just write "false" between [PARALLEL] tags.
+- If the original output can be parallelized with many branches (> 10), you may appropriately merge similar parallel branch content and generate a suitable parallel title attribute, ensuring that merged branches are of roughly equal length.
+- <branchgroup> tags may be used multiple times, so that parallel text may follow a serial-parallel-serial-parallel-... structure.
+- If a <branchgroup> contains only one parallel branch, parallelization is not needed; remove the corresponding <branchgroup> and <branch> tags.
+- Ensure that when all parallel tags are removed, the text remains coherent and matches the original output's content and structure exactly.
+- If parallel text is generated, the language must match the original output text.
+
+Below are some input-output examples for reference:
+
+Input-Output Example 1:  
+[Original Output]
+[INPUT_START]
+To connect and use a Lenovo wireless mouse and keyboard, follow these steps:  
+
+1. **Connect the Wireless Mouse**:  
+   - Ensure the mouse has sufficient battery power and turn it on.  
+   - Insert the receiver into the computer's USB port.  
+   - Press and hold the mouse scroll wheel while turning it to ON, hold for 3 seconds until the indicator light flashes, then bring it close to the receiver to complete pairing [1](@ref).  
+
+2. **Connect the Wireless Keyboard**:  
+   - Ensure the keyboard has sufficient battery power and turn it on.  
+   - Insert the receiver into the computer's USB port.  
+   - Simultaneously press the "F2," "F3," and "F4" keys on the keyboard, turn it to ON, release the keys, and press "3." The rapid flashing of the indicator light indicates successful pairing [1](@ref).  
+
+By following these steps, you can successfully connect and use Lenovo's wireless mouse and keyboard [1,4](@ref).  
+[INPUT_END]
+
+[Parallel Text]
+[PARALLEL]
+true  
+[PARALLEL]
+[OUTPUT_START]
+To connect and use a Lenovo wireless mouse and keyboard, follow these steps:  
+
+<branchgroup><branch title="Wireless Mouse">1. **Connect the Wireless Mouse**:  
+   - Ensure the mouse has sufficient battery power and turn it on.  
+   - Insert the receiver into the computer's USB port.  
+   - Press and hold the mouse scroll wheel while turning it to ON, hold for 3 seconds until the indicator light flashes, then bring it close to the receiver to complete pairing [1](@ref).</branch>  
+
+<branch title="Wireless Keyboard">2. **Connect the Wireless Keyboard**:  
+   - Ensure the keyboard has sufficient battery power and turn it on.  
+   - Insert the receiver into the computer's USB port.  
+   - Simultaneously press the "F2," "F3," and "F4" keys on the keyboard, turn it to ON, release the keys, and press "3." The rapid flashing of the indicator light indicates successful pairing [1](@ref).</branch></branchgroup>  
+
+By following these steps, you can successfully connect and use Lenovo's wireless mouse and keyboard [1,4](@ref).  
+[OUTPUT_END]
+
+Input-Output Example 2:  
+[Original Output]
+[INPUT_START]
+NetEase Youdao Notes supports importing various file formats. Users can import Word files, Evernote files, Youdao Notes files, and files from other Youdao Notes accounts [6,7](@ref).  
+[INPUT_END]
+
+[Parallel Text]
+[PARALLEL]
+false  
+[PARALLEL]
+[OUTPUT_START]
+[OUTPUT_END]
+
+Input-Output Example 3:  
+[Original Output]
+[INPUT_START]
+**Yes**, the changes in the proportion of ZTE's carrier network business revenue in its Q1 2024 financial report **are noteworthy**. Although direct data on the proportion change is not mentioned, the company's strategic adjustments in the carrier network business and their impact on the overall business are points worth noting. Below is a detailed introduction to the relevant information:  
+
+#### Overview of ZTE's Q1 2024 Financial Performance  
+- The company achieved operating revenue of 30.58 billion yuan, a year-on-year increase of 4.9% [4,5](@ref).  
+- Net profit attributable to the parent company was 2.74 billion yuan, a year-on-year increase of 3.7% [4](@ref).  
+
+#### Performance of Business Segments  
+- Government and enterprise as well as consumer businesses have returned to a rapid growth trajectory [4,5](@ref).  
+- The company is accelerating its shift from full connectivity to "connectivity + computing power," fully expanding market space [4](@ref). This indicates that ZTE has made strategic adjustments in its carrier network business to adapt to market and technological trends.  
+
+#### Impact on ZTE's Overall Financial Condition  
+- These changes show that while maintaining steady growth, ZTE is seeking new growth opportunities and market potential through strategic adjustments.  
+- The rapid growth of government and enterprise as well as consumer businesses, along with the strategic adjustments in the carrier network business, positively impact ZTE's overall financial condition, contributing to the company's long-term development and competitiveness.  
+
+In summary, although the specific data on the proportion change in ZTE's carrier network business revenue in its Q1 2024 financial report is not directly mentioned, the company's strategic adjustments and the performance of its business segments demonstrate its significant impact on the overall financial condition and long-term development strategy, making it noteworthy.  
+[INPUT_END]
+
+[Parallel Text]
+[PARALLEL]
+true  
+[PARALLEL]
+[OUTPUT_START]
+ **Yes**, the changes in the proportion of ZTE's carrier network business revenue in its Q1 2024 financial report **are noteworthy**. Although direct data on the proportion change is not mentioned, the company's strategic adjustments in the carrier network business and their impact on the overall business are points worth noting. Below is a detailed introduction to the relevant information:  
+
+<branchgroup><branch title="Financial Performance">#### Overview of ZTE's Q1 2024 Financial Performance  
+- The company achieved operating revenue of 30.58 billion yuan, a year-on-year increase of 4.9% [4,5](@ref).  
+- Net profit attributable to the parent company was 2.74 billion yuan, a year-on-year increase of 3.7% [4](@ref).</branch>  
+
+<branch title="Business Segments">#### Performance of Business Segments  
+- Government and enterprise as well as consumer businesses have returned to a rapid growth trajectory [4,5](@ref).  
+- The company is accelerating its shift from full connectivity to "connectivity + computing power," fully expanding market space [4](@ref). This indicates that ZTE has made strategic adjustments in its carrier network business to adapt to market and technological trends.  
+</branch></branchgroup>  
+
+#### Impact on ZTE's Overall Financial Condition  
+- These changes show that while maintaining steady growth, ZTE is seeking new growth opportunities and market potential through strategic adjustments.  
+- The rapid growth of government and enterprise as well as consumer businesses, along with the strategic adjustments in the carrier network business, positively impact ZTE's overall financial condition, contributing to the company's long-term development and competitiveness.  
+In summary, although the specific data on the proportion change in ZTE's carrier network business revenue in its Q1 2024 financial report is not directly mentioned, the company's strategic adjustments and the performance of its business segments demonstrate its significant impact on the overall financial condition and long-term development strategy, making it noteworthy.  
+[OUTPUT_END]
+
+Input-Output Example 4:  
+[Original Output]
+[INPUT_START]
+Alright, we first need to calculate the result of 54*12 + 23*23, then perform the @ operation on each number in the expression and the final result, and finally sum them up to get the final result.  
+We start by solving the expression 54*12 + 23*23, which can be calculated step by step as follows:  
+1. Calculate 54 multiplied by 12.  
+2. Calculate 23 multiplied by 23.  
+3. Add the two results obtained above.  
+
+First, let's calculate each multiplication result:  
+### Calculate 54 multiplied by 12  
+1. Calculate 54 multiplied by 10.  
+54 * 10 = 540  
+2. Calculate 54 multiplied by 2.  
+54 * 2 = 108  
+3. Add the results of 54 multiplied by 10 and 54 multiplied by 2.  
+540 + 108 = 648  
+
+### Calculate 23 multiplied by 23  
+1. Calculate 23 multiplied by 20.  
+23 * 20 = 460  
+2. Calculate 23 multiplied by 3.  
+23 * 3 = 69  
+3. Add the results of 23 multiplied by 20 and 23 multiplied by 3.  
+460 + 69 = 529  
+
+### Add the results of the two multiplications  
+1. 648 + 529 = 1177  
+
+Next, we need to perform the @ operation on each number in the expression (54, 12, 23, 23) and the final result (1177):  
+### 54@1177  
+- Perform the @ operation on 54 and 1177:  
+\[ 54@1177 = 54^2 \times 1177 + 1 = 2916 \times 1177 + 1 = 3430932 + 1 = 3430933 \]
+### 12@1177  
+- Perform the @ operation on 12 and 1177:  
+\[ 12@1177 = 12^2 \times 1177 + 1 = 144 \times 1177 + 1 = 169488 + 1 = 169489 \]
+### 23@1177  
+- Perform the @ operation on 23 and 1177 (twice, since 23 appears twice):  
+\[ 23@1177 = 23^2 \times 1177 + 1 = 529 \times 1177 + 1 = 622033 + 1 = 622034 \]
+\[ 23@1177 = 23^2 \times 1177 + 1 = 529 \times 1177 + 1 = 622033 + 1 = 622034 \]
+
+Sum all the results of the @ operations:  
+\[ 3430933 + 169489 + 622034 + 622034 = 4840490 \]
+
+The final result is 4840490.  
+[INPUT_END]
+
+[Parallel Text]
+[PARALLEL]
+true  
+[PARALLEL]
+[OUTPUT_START]
+Alright, we first need to calculate the result of 54*12 + 23*23, then perform the @ operation on each number in the expression and the final result, and finally sum them up to get the final result.  
+We start by solving the expression 54*12 + 23*23, which can be calculated step by step as follows:  
+1. Calculate 54 multiplied by 12.  
+2. Calculate 23 multiplied by 23.  
+3. Add the two results obtained above.  
+
+First, let's calculate each multiplication result:  
+<branchgroup><branch title="54*12">### Calculate 54 multiplied by 12  
+1. Calculate 54 multiplied by 10.  
+54 * 10 = 540  
+2. Calculate 54 multiplied by 2.  
+54 * 2 = 108  
+3. Add the results of 54 multiplied by 10 and 54 multiplied by 2.  
+540 + 108 = 648</branch>  
+
+<branch title="23*23">### Calculate 23 multiplied by 23  
+1. Calculate 23 multiplied by 20.  
+23 * 20 = 460  
+2. Calculate 23 multiplied by 3.  
+23 * 3 = 69  
+3. Add the results of 23 multiplied by 20 and 23 multiplied by 3.  
+460 + 69 = 529</branch></branchgroup>  
+
+### Add the results of the two multiplications  
+1. 648 + 529 = 1177  
+
+Next, we need to perform the @ operation on each number in the expression (54, 12, 23, 23) and the final result (1177):  
+<branchgroup><branch title="54@1177">### 54@1177  
+- Perform the @ operation on 54 and 1177:  
+\[ 54@1177 = 54^2 \times 1177 + 1 = 2916 \times 1177 + 1 = 3430932 + 1 = 3430933 \]</branch>  
+<branch title="12@1177">### 12@1177  
+- Perform the @ operation on 12 and 1177:  
+\[ 12@1177 = 12^2 \times 1177 + 1 = 144 \times 1177 + 1 = 169488 + 1 = 169489 \]</branch>  
+<branch title="23@1177">### 23@1177  
+- Perform the @ operation on 23 and 1177 (twice, since 23 appears twice):  
+\[ 23@1177 = 23^2 \times 1177 + 1 = 529 \times 1177 + 1 = 622033 + 1 = 622034 \]
+\[ 23@1177 = 23^2 \times 1177 + 1 = 529 \times 1177 + 1 = 622033 + 1 = 622034 \]</branch><branchgroup>  
+
+Sum all the results of the @ operations:  
+\[ 3430933 + 169489 + 622034 + 622034 = 4840490 \]
+
+The final result is 4840490.  
+[OUTPUT_END]
+
+Now given the following original output, please output the corresponding parallel text according to the above examples and requirements, and keep the original text while maintaining the output text in the same language:
+【Original Output】
+[INPUT_START]
+{answer}
+[INPUT_END]
+
+【Parallel Text】

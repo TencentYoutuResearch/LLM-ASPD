@@ -1,0 +1,185 @@
+Your task is to determine whether the model answer's format and completeness match that of the standard answer.
+
+Note that the input and output formats are as follows:  
+Input format:  
+【Standard Answer】  
+[TEXT_START]  
+XXXX (Standard answer content)  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+XXXX (Model answer content)  
+[TEXT_END]  
+
+Output format:  
+【Judgment Result】  
+[SAME_FORMAT]  
+X (Whether the formats match. X=true if the model answer's format matches the standard answer's; otherwise, X=false.)  
+[SAME_FORMAT]  
+[REASON_START]  
+XXXX (Reason for whether the formats match)  
+[REASON_END]  
+
+After understanding the background and the input-output format above, you are required to determine whether the model answer's format and completeness match those of the standard answer. These formats may include Markdown, JSON, HTML, etc. When judging format consistency, you must follow the rules below:  
+1. If the standard answer content has specific formatting—such as unique text or non-whitespace symbols at the beginning of paragraphs, or the text is divided into multiple sections with certain non-whitespace symbols—and the model answer lacks corresponding formatting, then the formats should be judged as inconsistent.  
+2. If the standard answer contains JSON content, and the model answer's JSON differs by even a single key or value, the formats should be judged as inconsistent. Additionally, the model answer's JSON must comply with JSON formatting standards; otherwise, it should also be considered inconsistent.  
+3. If the standard answer contains Markdown content, and the model answer differs in heading levels, number of items, numbering format, or text formatting (such as bold or underline), the formats should be judged as inconsistent.  
+4. If the standard answer contains HTML or XML content, you must check whether the model answer has the same number of HTML/XML tags and whether the nesting hierarchy matches. If any requirement is unmet, the formats should be judged as inconsistent.  
+5. If the key points (i.e., semantic content describing the subject, explanations, or conclusions) in the model answer are more or fewer than those in the standard answer, the formats should also be judged as inconsistent.  
+6. Note that blank lines, line breaks, and whitespace characters in the model answer do not affect the judgment of format consistency.
+
+Below are some input-output examples for reference:
+
+Input-Output Example 1:  
+【Standard Answer】  
+[TEXT_START]  
+To use the Game Boost feature on Xiaomi phones, follow these steps:  
+
+1. **Open Security Center**: Find and tap the "Security Center" app on the home screen [7](@ref).  
+2. **Enter Game Boost**: In the Security Center interface, tap the "Game Boost" option [1,3](@ref).  
+3. **Add a Game**: After entering the Game Boost interface, tap the "+" icon in the top-right corner to select and add the game you want to boost [5](@ref).  
+4. **Optimize Settings**: Tap the "Gear" icon to enter the settings page, where you can enable features like memory cleanup, network acceleration, and anti-misoperation [4,6](@ref).  
+
+These steps can effectively improve game smoothness and reduce interruptions from calls and notifications during gameplay [3,7](@ref).  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+To use the Game Boost feature on Xiaomi phones, follow these steps:  
+
+1. Open Security Center: Find and tap the "Security Center" app on the home screen [7](@ref).  
+2. Enter Game Boost: In the Security Center interface, tap the "Game Boost" option [1,3](@ref).  
+3. Add a Game: After entering the Game Boost interface, tap the "+" icon in the top-right corner to select and add the game you want to boost [5](@ref).  
+4. Optimize Settings: Tap the "Gear" icon to enter the settings page, where you can enable features like memory cleanup, network acceleration, and anti-misoperation [4,6](@ref).  
+
+These steps can effectively improve game smoothness and reduce interruptions from calls and notifications during gameplay [3,7](@ref).  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_FOREMAT]  
+false  
+[SAME_FOREMAT]  
+[REASON_START]  
+The model answer lacks bold formatting for the step descriptions, making it inconsistent with the standard answer's format.  
+[REASON_END]  
+
+Input-Output Example 2:  
+【Standard Answer】  
+[TEXT_START]  
+When a real-name-verified primary account logs into the large model knowledge engine product for the first time, the following free trial quotas are available:  
+
+- Fine-tuned Large Model Standard Edition: Receive 500,000 free tokens, valid for 2 months.  
+- Knowledge Base Capacity: Receive 3,000,000 free characters, valid for 6 months.  
+- Atomic Capability - Multi-turn Rewrite: Receive 500,000 free tokens for multi-turn rewriting, valid for 2 months.  
+- Atomic Capability - Embedding: Receive 500,000 free tokens for embedding, valid for 2 months.  
+
+Note: Free resource packs are deducted first, with a shared quota of 500,000 tokens.  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+When a real-name-verified primary account logs into the large model knowledge engine product for the first time, the following free trial quotas are available:  
+
+1. Fine-tuned Large Model Standard Edition:  
+Receive 500,000 free tokens, valid for 2 months.  
+
+2. Knowledge Base Capacity:  
+Receive 3,000,000 free characters, valid for 6 months.  
+
+3. Atomic Capability - Multi-turn Rewrite:  
+Receive 500,000 free tokens for multi-turn rewriting, valid for 2 months.  
+
+4. Atomic Capability - Embedding:  
+Receive 500,000 free tokens for embedding, valid for 2 months.  
+
+Note: Free resource packs are deducted first, with a shared quota of 500,000 tokens.  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_FOREMAT]  
+false  
+[SAME_FOREMAT]  
+[REASON_START]  
+The model answer replaces the standard answer's "-" symbols with numbered lists, making the format inconsistent.  
+[REASON_END]  
+
+Input-Output Example 3:  
+【Standard Answer】  
+[TEXT_START]  
+Thought:  
+Convert "new york city" to title case, resulting in 'New York City'.  
+
+Final Answer:  
+{"No. 1": {"City": "New York City"}}  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+Convert "new york city" to title case, resulting in 'New York City'.  
+
+Final Answer:  
+{"No. 1": {"City": "New York City"}}  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_FOREMAT]  
+false  
+[SAME_FOREMAT]  
+[REASON_START]  
+The model answer omits the "Thought:" label in the first paragraph, making it inconsistent with the standard answer's format.  
+[REASON_END]  
+
+Input-Output Example 4:  
+【Standard Answer】  
+[TEXT_START]  
+1. **Create Contract**: Sales representatives search for "Contracts" in App Launcher, click "New," enter contract details, and save changes [3](@ref).  
+2. **Link to Opportunity**: Ensure the contract appears in the opportunity's details for quick access by sales reps [3](@ref).  
+3. **Automation and Reminders**: Set workflow alerts to remind sales reps of contract renewals and other key actions [3](@ref).  
+4. **E-Signature**: Use tools like DocuSign, integrated with Salesforce, to simplify the signing process [4](@ref).  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+1. **Create Contract**:  
+ Sales representatives search for "Contracts" in App Launcher, click "New," enter contract details, and save changes [3](@ref).  
+2. **Link to Opportunity**:  
+ Ensure the contract appears in the opportunity's details for quick access by sales reps [3](@ref).  
+3. **Automation and Reminders**:  
+ Set workflow alerts to remind sales reps of contract renewals and other key actions [3](@ref).  
+4. **E-Signature**:  
+ Use tools like DocuSign, integrated with Salesforce, to simplify the signing process [4](@ref).  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_FOREMAT]  
+true  
+[SAME_FOREMAT]  
+[REASON_START]  
+The model answer matches the standard answer in both content and format.  
+[REASON_END]  
+
+Input-Output Example 5:  
+【Standard Answer】  
+[TEXT_START]  
+Final Answer:  
+```json  
+{"Date": "1965-11-19"}  
+```  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+Final Answer:  
+```json  
+```  
+[TEXT_END]  
+【Judgment Result】  
+[SAME_FOREMAT]  
+false  
+[SAME_FOREMAT]  
+[REASON_START]  
+The model answer omits the JSON content (the part after ```json) present in the standard answer, making the format inconsistent.  
+[REASON_END]  
+
+Now, given the following standard answer and model answer, please provide the format consistency judgment result based on the examples and format consistency rules above:  
+【Standard Answer】  
+[TEXT_START]  
+{raw_answer}  
+[TEXT_END]  
+【Model Answer】  
+[TEXT_START]  
+{model_answer}  
+[TEXT_END]  
+
+【Judgment Result】

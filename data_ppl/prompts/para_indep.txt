@@ -1,0 +1,150 @@
+Your task is to determine whether the subsequent parallel branches meet the condition: each branch content is independent, and mutually non-dependent to the content of other parallel branches, given the question and the precondition text. This assessment is to judge the rationality of parallelization among these branches.
+
+The background of parallel decoding is as follows: Certain elements in the original output text of a language model may be suitable for conversion into a parallel format, in which some parts are divided into multiple parallelizable blocks that are logically independent and do not depend on each other. Parallel text generation enables the model to produce these contents simultaneously, rather than sequentially, thereby significantly improving decoding efficiency and response time. The general process of parallel decoding is as follows:  
+
+1. Serial content
+2. Generate parallel content (which may include multiple parallel branches)
+3. Wait for all parallel branches to complete before resuming serial content
+4. Repeat steps 1–3 until output is complete
+
+The core idea of parallel rewriting is to split the original output text into different parallel branches wherever possible, which can be independently completed without relying on each other's results. Once all parallel branches have been completed, aggregate the results before proceeding with further parallel branch planning, continuing this process until the problem is solved. This parallel branch division can be applied to various tasks, such as reading comprehension or mathematical problem-solving.
+
+Note that the input and output formats are as follows:  
+
+**Input Format:**  
+【Question】  
+[TEXT_START]  
+XXXX (question)  
+[TEXT_END]  
+【Precondition Text】  
+[TEXT_START]  
+XXXX (content preceding the parallel branches)  
+[TEXT_END]  
+【Parallel Text】  
+[TEXT_START]  
+<Branch1 title="XX">  
+XXXXX (content of Branch1)  
+</Branch1>  
+<Branch2 title="XX">  
+XXXXX (content of Branch2)  
+</Branch2>  
+...  
+[TEXT_END]
+
+**Output Format:**  
+【Judgment Result】  
+[PARALLEL]  
+X (parallel rationality; if the parallel branches are reasonably divided, independent, and mutually non-dependent, X=true; otherwise, X=false)  
+[PARALLEL]  
+[REASON_START]  
+XXXX (reasoning for whether parallelization is reasonable)  
+[REASON_END]
+
+After understanding the above background and input/output formats, you need to evaluate whether the branching content in the parallel text is reasonable based on the precondition text. The precondition text can be regarded as the serial content in step 1 of the parallel decoding process, while the branching content consists of multiple parallel branches generated after the serial content. These parallel branches can access all information from the precondition text but cannot access information from other parallel branches. Note that in the input parallel content, each branch is enclosed in tags like `<BranchN>`, where N is the branch number, and the `title` attribute in the branch tag serves as a summary title for the branch (typically within 10 characters in length).
+
+For judging the rationality of parallelization, you must adhere to the following rules:  
+1. If any branch explicitly or implicitly relies on, or uses, intermediate results or conclusions from other branches, the parallel branching is unreasonable because it violates the principle of mutual independence.  
+2. If any branch depends on another branch as a precondition, the parallel division is also unreasonable.  
+3. If the `title` attributes of any parallel branches are identical, this would prevent parallel decoding from generating distinct parallel branches based on the titles, making the parallel division unreasonable.
+4. If the Precondition Text relies on any intermediate results or conclusions from these branch, the parallel division is also unreasonable. 
+
+Below are some input-output examples for reference.
+
+**Input/Output Example 1:**  
+**Input:**  
+【Question】  
+[TEXT_START]
+A driver travels for $2$ hours at $60$ miles per hour, during which her car gets $30$ miles per gallon of gasoline. She is paid $\$0.50$ per mile, and her only expense is gasoline at $\$2.00$ per gallon. What is her net rate of pay, in dollars per hour, after this expense?  
+[TEXT_END]
+【Precondition Text】  
+[TEXT_START]
+The driver travels for 2 hours at 60 miles per hour, so the distance traveled is:  
+60 miles/hour × 2 hours = 120 miles.  
+[TEXT_END]
+【Parallel Text】  
+[TEXT_START]
+<Branch1 title="Gross Pay">Her gross pay is calculated at $0.50 per mile:  
+120 miles × $0.50/mile = $60.00.  
+</Branch1>  
+<Branch2 title="Gasoline Usage">The car gets 30 miles per gallon, and she drove 120 miles, so the gasoline used is:  
+120 miles / 30 miles/gallon = 4 gallons.  
+</Branch2>  
+[TEXT_END]
+**Output:**  
+【Judgment Result】  
+[PARALLEL]
+true  
+[PARALLEL]
+[REASON_START]
+In both branches, the calculations for Gross Pay and Gasoline Usage do not explicitly or implicitly depend on each other or rely on the other's results, so the parallel division is reasonable.  
+[REASON_END]
+
+**Input/Output Example 2:**  
+**Input:**  
+【Question】  
+[TEXT_START]
+Let $f$ be the function defined by $f(x)=ax^2-\sqrt{2}$ for some positive $a$. If $f(f(\sqrt{2}))=-\sqrt{2}$ then $a=$  
+[TEXT_END]
+【Precondition Text】  
+[TEXT_START]
+The function is defined as \(f(x) = ax^2 - \sqrt{2}\), where \(a > 0\). The given condition is \(f(f(\sqrt{2})) = -\sqrt{2}\).  
+First, calculate \(f(\sqrt{2})\):  
+\[f(\sqrt{2}) = a(\sqrt{2})^2 - \sqrt{2} = a \cdot 2 - \sqrt{2} = 2a - \sqrt{2}.\]
+Next, calculate \(f(f(\sqrt{2})) = f(2a - \sqrt{2})\):  
+\[f(2a - \sqrt{2}) = a(2a - \sqrt{2})^2 - \sqrt{2}.\]
+Expand \((2a - \sqrt{2})^2\):  
+\[(2a - \sqrt{2})^2 = (2a)^2 - 2 \cdot (2a) \cdot (\sqrt{2}) + (\sqrt{2})^2 = 4a^2 - 4a\sqrt{2} + 2.\]
+Substitute back into the original equation:  
+\[f(2a - \sqrt{2}) = a(4a^2 - 4a\sqrt{2} + 2) - \sqrt{2} = 4a^3 - 4a^2\sqrt{2} + 2a - \sqrt{2}.\]
+Set this equal to \(-\sqrt{2}\):  
+\[4a^3 - 4a^2\sqrt{2} + 2a - \sqrt{2} = -\sqrt{2}.\]
+Add \(\sqrt{2}\) to both sides:  
+\[4a^3 - 4a^2\sqrt{2} + 2a = 0.\]
+Factor out \(a\) (since \(a > 0\), \(a \neq 0\)):  
+\[a(4a^2 - 4a\sqrt{2} + 2) = 0.\]
+Solve for \(a\):  
+\[4a^2 - 4a\sqrt{2} + 2 = 0.\]
+Divide by 2 to simplify:  
+\[2a^2 - 2a\sqrt{2} + 1 = 0.\]
+Use the quadratic formula to solve:  
+\[a = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a},\] where \(A = 2\), \(B = -2\sqrt{2}\), \(C = 1\).  
+The discriminant is:  
+\[D = (-2\sqrt{2})^2 - 4 \cdot 2 \cdot 1 = 8 - 8 = 0.\]
+Since \(D = 0\), there is only one real solution:  
+\[a = \frac{2\sqrt{2}}{4} = \frac{\sqrt{2}}{2}.\]
+Verify the solution:  
+Let \(a = \frac{\sqrt{2}}{2}\).  
+[TEXT_END]
+【Parallel Text】  
+[TEXT_START]
+<Branch1 title="Calculate f(√2)">Calculate \( f(\sqrt{2}) \):  
+\[ f(\sqrt{2}) = \frac{\sqrt{2}}{2} \cdot (\sqrt{2})^2 - \sqrt{2} = \frac{\sqrt{2}}{2} \cdot 2 - \sqrt{2} = \sqrt{2} - \sqrt{2} = 0. \]
+</Branch1>  
+<Branch2 title="Calculate f(0)">Then calculate \( f(f(\sqrt{2})) = f(0) \):  
+\[ f(0) = \frac{\sqrt{2}}{2} \cdot 0^2 - \sqrt{2} = -\sqrt{2}, \]
+</Branch2>  
+[TEXT_END]
+**Output:**  
+【Judgment Result】  
+[PARALLEL]
+false  
+[PARALLEL]
+[REASON_START]
+In Branch2, "Then calculate \( f(f(\sqrt{2})) = f(0) \)" clearly relies on the conclusion \( f(\sqrt{2}) = 0 \) from Branch1. Thus, Branch2 depends on Branch1's result, making the parallel division unreasonable.  
+[REASON_END]
+
+Now, given the following question, precondition text, and parallel content, please provide a judgment on the rationality of parallelization based on the above examples and criteria:  
+【Question】  
+[TEXT_START]
+{question}  
+[TEXT_END]
+【Precondition Text】  
+[TEXT_START]
+{answer_prefix}  
+[TEXT_END]
+【Parallel Text】  
+[TEXT_START]
+{branch_infos}  
+[TEXT_END]
+
+【Judgment Result】
